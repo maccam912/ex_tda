@@ -1,6 +1,11 @@
 defmodule ExTda.Client do
   @base_url "https://api.tdameritrade.com"
 
+  def headers() do
+    [{"access_token", at}] = :ets.lookup(:kv, "access_token")
+    %{"Authorization" => "Bearer #{at}"}
+  end
+
   def auth_url() do
     response_type = URI.encode_www_form("code")
     redirect_uri = URI.encode_www_form("https://127.0.0.1:4000")
@@ -48,5 +53,12 @@ defmodule ExTda.Client do
 
     %{"access_token" => at} = Jason.decode!(body)
     at
+  end
+
+  def get_accounts() do
+    url = "#{@base_url}/v1/accounts"
+    %HTTPoison.Response{body: body} = HTTPoison.get!(url, headers())
+
+    Jason.decode!(body)
   end
 end
