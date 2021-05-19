@@ -10,30 +10,43 @@ defmodule ExTda.Client do
     "#{base}?response_type=#{response_type}&redirect_uri=#{redirect_uri}&client_id=#{client_id}"
   end
 
-  def initial_token() do
-    case :ets.lookup(ExTda.Cache.cache(), "initial_token") do
-      [{"initial_token", it}] ->
-        it
+  def get_initial_tokens() do
+    url = "#{@base_url}/v1/oauth2/token"
 
-      _ ->
-        url = "#{@base_url}/v1/oauth2/token"
+    [{"code", code}] = :ets.lookup(:kv, "code")
 
-        body = [
-          grant_type: "authorization_code",
-          client_id: "#{Application.get_env(:ex_tda, :client_id)}@AMER.OAUTHAP",
-          access_type: "offline",
-          code: ExTda.Cache.get_code(),
-          redirect_uri: "https://127.0.0.1:4000"
-        ]
+    payload = [
+      grant_type: "authorization_code",
+      client_id: "#{Application.get_env(:ex_tda, :client_id)}@AMER.OAUTHAP",
+      access_type: "offline",
+      code: code,
+      redirect_uri: "https://127.0.0.1:4000"
+    ]
 
-        headers = %{"Content-Type" => "application/x-www-form-urlencoded"}
+    headers = %{"Content-Type" => "application/x-www-form-urlencoded"}
 
-        {:ok, %HTTPoison.Response{body: body}} =
-          HTTPoison.post(url, URI.encode_query(body), headers)
+    {:ok, %HTTPoison.Response{body: body}} =
+      HTTPoison.post(url, URI.encode_query(payload), headers)
 
-        %{"access_token" => at} = Jason.decode!(body)
-        :ets.insert(ExTda.Cache.cache(), {"initial_token", at})
-        at
-    end
+    %{"access_token" => at, "refresh_token" => rt} = Jason.decode!(body)
+    {at, rt}
+  end
+
+  def get_access_token() do
+    [{"refresh_token", refresh_token}] = :ets.lookup(:kv, "refresh_token")
+
+    payload = [
+      grant_type: "refresh_token",
+      refresh_token: refresh_token,
+      client_id: "#{Application.get_env(:ex_tda, :client_id)}@AMER.OAUTHAP"
+    ]
+
+    headers = %{"Content-Type" => "application/x-www-form-urlencoded"}
+
+    {:ok, %HTTPoison.Response{body: body}} =
+      HTTPoison.post("#{@base_url}/v1/oauth2/token", URI.encode_query(payload), headers)
+
+    %{"access_token" => at} = Jason.decode!(body)
+    at
   end
 end

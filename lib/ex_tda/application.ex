@@ -7,9 +7,11 @@ defmodule ExTda.Application do
 
   @impl true
   def start(_type, _args) do
+    :ets.new(:kv, [:set, :public, :named_table])
+
     children = [
       {ExTda.Endpoint, []},
-      {ExTda.Cache, []}
+      {ExTda.Token, nil}
       # Starts a worker by calling: ExTda.Worker.start_link(arg)
       # {ExTda.Worker, arg}
     ]

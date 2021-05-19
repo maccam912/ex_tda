@@ -9,10 +9,13 @@ defmodule ExTda.Endpoint do
     code = Map.get(conn.query_params, "code", nil)
 
     if !is_nil(code) do
-      :ets.insert(ExTda.Cache.cache(), {"code", code})
+      :ets.insert(:kv, {"code", code})
+      {at, rt} = ExTda.Client.get_initial_tokens()
+      :ets.insert(:kv, {"refresh_token", rt})
+      :ets.insert(:kv, {"access_token", at})
     end
 
-    token = :ets.lookup(ExTda.Cache.cache(), "code")
+    token = :ets.lookup(:kv, "code")
 
     case token do
       [] ->
