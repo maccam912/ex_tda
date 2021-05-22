@@ -61,4 +61,23 @@ defmodule ExTda.Client do
 
     Jason.decode!(body)
   end
+
+  def get_option_chain(symbol, contractType \\ "ALL", range \\ "ALL") do
+    url = "#{@base_url}/v1/marketdata/chains"
+
+    params = %{
+      symbol: symbol,
+      includeQuotes: true,
+      contractType: contractType,
+      range: range
+    }
+
+    new_url = "#{url}?#{URI.encode_query(params)}"
+    %HTTPoison.Response{body: body} = HTTPoison.get!(new_url, headers())
+
+    %{"callExpDateMap" => calls, "putExpDateMap" => puts, "underlying" => underlying} =
+      Jason.decode!(body)
+
+    %{calls: calls, puts: puts, underlying: underlying}
+  end
 end
