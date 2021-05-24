@@ -83,7 +83,9 @@ defmodule ExTda.Options do
                                   | _
                                 ]} ->
                 if delta != "NaN" do
-                  "('#{symbol}', #{dte}, 'PUT', #{mark}, #{bid}, #{ask}, #{theoretical}, #{delta}, #{theta}, #{strike}, '#{exp}')"
+                  "('#{symbol}', #{dte}, 'PUT', #{mark}, #{bid}, #{ask}, #{theoretical}, #{delta}, #{
+                    theta
+                  }, #{strike}, '#{exp}')"
                 else
                   nil
                 end
@@ -91,7 +93,9 @@ defmodule ExTda.Options do
               |> Stream.filter(fn item -> !is_nil(item) end)
               |> Enum.join(",")
 
-            "insert into options (symbol, dte, side, underlying, bid, ask, delta, strike, exp) values #{values_lines}"
+            "insert into options (symbol, dte, side, underlying, bid, ask, theoretical, delta, theta, strike, exp) values #{
+              values_lines
+            }"
           end)
           |> Enum.to_list()
 
@@ -114,7 +118,9 @@ defmodule ExTda.Options do
                                   | _
                                 ]} ->
                 if delta != "NaN" do
-                  "('#{symbol}', #{dte}, 'CALL', #{mark}, #{bid}, #{ask}, #{theoretical}, #{delta}, #{theta}, #{strike}, '#{exp}')"
+                  "('#{symbol}', #{dte}, 'CALL', #{mark}, #{bid}, #{ask}, #{theoretical}, #{delta}, #{
+                    theta
+                  }, #{strike}, '#{exp}')"
                 else
                   nil
                 end
@@ -122,7 +128,9 @@ defmodule ExTda.Options do
               |> Stream.filter(fn item -> !is_nil(item) end)
               |> Enum.join(",")
 
-            "insert into puts (symbol, dte, side, underlying, bid, ask, delta, strike, exp) values #{values_lines}"
+            "insert into options (symbol, dte, side, underlying, bid, ask, theoretical, delta, theta, strike, exp) values #{
+              values_lines
+            }"
           end)
           |> Enum.to_list()
 
