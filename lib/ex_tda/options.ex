@@ -51,11 +51,11 @@ defmodule ExTda.Options do
           )"
       )
 
-    # :ok =
-    #   Exqlite.Sqlite3.execute(
-    #     conn,
-    #     "create unique index if not exists symbol_strike_exp_i on puts (symbol, strike, exp)"
-    #   )
+    :ok =
+      Exqlite.Sqlite3.execute(
+        conn,
+        "create unique index if not exists symbol_strike_exp_i on options (symbol, side, strike, dte, exp)"
+      )
 
     :ok
   end
