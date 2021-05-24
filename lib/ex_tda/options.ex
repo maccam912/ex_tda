@@ -44,25 +44,24 @@ defmodule ExTda.Options do
     :ok =
       Exqlite.Sqlite3.execute(
         conn,
-        "create table if not exists puts
+        "create table if not exists options
           (symbol text, dte integer, side text, underlying decimal, bid decimal, ask decimal, theoretical decimal, delta decimal, theta decimal, strike decimal, exp text,
           prem_per_day decimal GENERATED ALWAYS AS (bid/dte) VIRTUAL,
           prem_per_day_per_strike GENERATED ALWAYS AS ((bid/dte)/strike) VIRTUAL
           )"
       )
 
-    :ok =
-      Exqlite.Sqlite3.execute(
-        conn,
-        "create unique index if not exists symbol_strike_exp_i on puts (symbol, strike, exp)"
-      )
+    # :ok =
+    #   Exqlite.Sqlite3.execute(
+    #     conn,
+    #     "create unique index if not exists symbol_strike_exp_i on puts (symbol, strike, exp)"
+    #   )
 
     :ok
   end
 
   @spec get_options_insert_queries(binary) :: list
   def get_options_insert_queries(symbol) do
-    # %{puts: puts} = ExTda.Client.get_option_chain(symbol, "PUT", "OTM")
     case ExTda.Client.get_option_chain(symbol) do
       %{calls: calls, puts: puts, underlying: %{"mark" => mark}} ->
         put_options =
@@ -92,7 +91,7 @@ defmodule ExTda.Options do
               |> Stream.filter(fn item -> !is_nil(item) end)
               |> Enum.join(",")
 
-            "insert into puts (symbol, dte, side, underlying, bid, ask, delta, strike, exp) values #{values_lines}"
+            "insert into options (symbol, dte, side, underlying, bid, ask, delta, strike, exp) values #{values_lines}"
           end)
           |> Enum.to_list()
 
